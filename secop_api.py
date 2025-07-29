@@ -9,8 +9,8 @@ Original file is located at
 
 # SECOP II
 
-# 1. Instalaciones
-# Solo ejecutar si no tienes las librerías instaladas
+# 1. Installation
+# Only run if you don't have the libraries installed
 !pip install pandas requests
 
 import pandas as pd
@@ -18,76 +18,76 @@ import requests
 from datetime import datetime
 import time
 
-def buscar_contratos(limite=100, **filtros):
+def search_contracts(limit=100, **filters):
     """
-    Busca contratos en SECOP II con filtros personalizables
+    Search contracts in SECOP II with customizable filters
     """
     url = "https://www.datos.gov.co/resource/rpmr-utcd.json"
-    #Alternativa SODA 2.1 ilimitada: https://www.datos.gov.co/api/v3/views/rpmr-utcd/query.json
+    # Unlimited SODA 2.1 alternative: https://www.datos.gov.co/api/v3/views/rpmr-utcd/query.json
 
-    # Construir parámetros de consulta
-    params = {"$limit": limite}
+    # Build query parameters
+    params = {"$limit": limit}
 
-    # Mapeo de nombres de parámetros (ajustado a las columnas reales del SECOP)
-    mapeo_campos = {
-        'nivel_entidad': 'nivel_entidad',
-        'codigo_entidad': 'codigo_entidad_en_secop',
-        'nombre_entidad': 'nombre_de_la_entidad',
-        'nit_entidad': 'nit_de_la_entidad',
-        'departamento': 'departamento_entidad',
-        'municipio': 'municipio_entidad',
-        'estado_proceso': 'estado_del_proceso',
-        'modalidad': 'modalidad_de_contrataci_n',
-        'objeto_a_contratar': 'objeto_a_contratar',
-        'objeto_proceso': 'objeto_del_proceso',
-        'numero_proceso': 'numero_de_proceso',
-        'valor_contrato': 'valor_contrato',
-        'nombre_contratista': 'nom_raz_social_contratista',
-        'url_contrato': 'url_contrato',
-        'origen': 'origen',
-        'tipo_documento': 'tipo_documento_proveedor',
-        'documento_proveedor': 'documento_proveedor',
-        'fecha_firma': 'fecha_de_firma_del_contrato',
-        'fecha_inicio': 'fecha_inicio_ejecuci_n',
-        'fecha_fin': 'fecha_fin_ejecuci_n',
+    # Parameter name mapping (adjusted to real SECOP columns)
+    field_mapping = {
+        'entity_level': 'nivel_entidad',
+        'entity_code': 'codigo_entidad_en_secop',
+        'entity_name': 'nombre_de_la_entidad',
+        'entity_nit': 'nit_de_la_entidad',
+        'department': 'departamento_entidad',
+        'municipality': 'municipio_entidad',
+        'process_status': 'estado_del_proceso',
+        'modality': 'modalidad_de_contrataci_n',
+        'contract_object': 'objeto_a_contratar',
+        'process_object': 'objeto_del_proceso',
+        'process_number': 'numero_de_proceso',
+        'contract_value': 'valor_contrato',
+        'contractor_name': 'nom_raz_social_contratista',
+        'contract_url': 'url_contrato',
+        'origin': 'origen',
+        'document_type': 'tipo_documento_proveedor',
+        'provider_document': 'documento_proveedor',
+        'signature_date': 'fecha_de_firma_del_contrato',
+        'start_date': 'fecha_inicio_ejecuci_n',
+        'end_date': 'fecha_fin_ejecuci_n',
     }
 
-    # Aplicar filtros simples
-    for filtro_key, filtro_value in filtros.items():
-        if filtro_value and filtro_key in mapeo_campos:
-            campo_api = mapeo_campos[filtro_key]
-            if 'objeto' in filtro_key:
-                params[campo_api] = {'$like': f'%{filtro_value}%'}
+    # Apply simple filters
+    for filter_key, filter_value in filters.items():
+        if filter_value and filter_key in field_mapping:
+            api_field = field_mapping[filter_key]
+            if 'object' in filter_key:
+                params[api_field] = {'$like': f'%{filter_value}%'}
             else:
-                params[campo_api] = filtro_value
+                params[api_field] = filter_value
 
-    # Construir filtros WHERE para rangos
+    # Build WHERE filters for ranges
     where_conditions = []
 
-    if filtros.get('valor_minimo', 0) > 0:
-        where_conditions.append(f"valor_contrato >= {filtros['valor_minimo']}")
+    if filters.get('minimum_value', 0) > 0:
+        where_conditions.append(f"valor_contrato >= {filters['minimum_value']}")
 
-    if filtros.get('valor_maximo', 0) > 0:
-        where_conditions.append(f"valor_contrato <= {filtros['valor_maximo']}")
+    if filters.get('maximum_value', 0) > 0:
+        where_conditions.append(f"valor_contrato <= {filters['maximum_value']}")
 
-    if filtros.get('fecha_firma_desde'):
-        where_conditions.append(f"fecha_de_firma_del_contrato >= '{filtros['fecha_firma_desde']}'")
+    if filters.get('signature_date_from'):
+        where_conditions.append(f"fecha_de_firma_del_contrato >= '{filters['signature_date_from']}'")
 
-    if filtros.get('fecha_firma_hasta'):
-        where_conditions.append(f"fecha_de_firma_del_contrato <= '{filtros['fecha_firma_hasta']}'")
+    if filters.get('signature_date_to'):
+        where_conditions.append(f"fecha_de_firma_del_contrato <= '{filters['signature_date_to']}'")
 
-    if filtros.get('fecha_inicio_desde'):
-        where_conditions.append(f"fecha_inicio_ejecuci_n >= '{filtros['fecha_inicio_desde']}'")
+    if filters.get('start_date_from'):
+        where_conditions.append(f"fecha_inicio_ejecuci_n >= '{filters['start_date_from']}'")
 
-    if filtros.get('fecha_inicio_hasta'):
-        where_conditions.append(f"fecha_inicio_ejecuci_n <= '{filtros['fecha_inicio_hasta']}'")
+    if filters.get('start_date_to'):
+        where_conditions.append(f"fecha_inicio_ejecuci_n <= '{filters['start_date_to']}'")
 
     if where_conditions:
         params['$where'] = ' AND '.join(where_conditions)
 
-    # Realizar petición con reintentos
-    max_intentos = 3
-    for intento in range(max_intentos):
+    # Make request with retries
+    max_attempts = 3
+    for attempt in range(max_attempts):
         try:
             response = requests.get(url, params=params, timeout=30)
 
@@ -96,15 +96,15 @@ def buscar_contratos(limite=100, **filtros):
                 return pd.DataFrame(data) if data else pd.DataFrame()
 
             elif response.status_code == 429:  # Rate limit
-                if intento < max_intentos - 1:
-                    time.sleep(2 ** intento)
+                if attempt < max_attempts - 1:
+                    time.sleep(2 ** attempt)
                     continue
 
-            print(f"Error HTTP: {response.status_code}")
+            print(f"HTTP Error: {response.status_code}")
             return pd.DataFrame()
 
         except Exception as e:
-            if intento < max_intentos - 1:
+            if attempt < max_attempts - 1:
                 time.sleep(2)
                 continue
             print(f"Error: {e}")
@@ -112,122 +112,122 @@ def buscar_contratos(limite=100, **filtros):
 
     return pd.DataFrame()
 
-def mostrar_columnas_disponibles():
-    """Muestra las columnas disponibles en SECOP II"""
-    df_muestra = buscar_contratos(limite=1)
-    if not df_muestra.empty:
-        print("Columnas disponibles en SECOP II:")
-        for i, col in enumerate(df_muestra.columns, 1):
+def show_available_columns():
+    """Shows available columns in SECOP II"""
+    sample_df = search_contracts(limit=1)
+    if not sample_df.empty:
+        print("Available columns in SECOP II:")
+        for i, col in enumerate(sample_df.columns, 1):
             print(f"{i:2d}. {col}")
-    return df_muestra.columns.tolist() if not df_muestra.empty else []
+    return sample_df.columns.tolist() if not sample_df.empty else []
 
-def exportar_excel(df, prefijo="secop"):
-    """Exporta DataFrame a Excel con timestamp"""
+def export_excel(df, prefix="secop"):
+    """Export DataFrame to Excel with timestamp"""
     if df.empty:
-        print("Sin datos para exportar")
+        print("No data to export")
         return None
 
     timestamp = datetime.now().strftime('%Y%m%d_%H%M%S')
-    archivo = f"{prefijo}_{timestamp}.xlsx"
+    filename = f"{prefix}_{timestamp}.xlsx"
 
     try:
-        df.to_excel(archivo, index=False)
-        return archivo
+        df.to_excel(filename, index=False)
+        return filename
     except Exception as e:
-        print(f"Error al exportar: {e}")
+        print(f"Export error: {e}")
         return None
 
-def resumen_busqueda(df):
-    """Muestra resumen de resultados"""
+def search_summary(df):
+    """Show results summary"""
     if df.empty:
-        print("No se encontraron contratos")
+        print("No contracts found")
         return
 
-    print(f"Encontrados: {len(df)} contratos")
+    print(f"Found: {len(df)} contracts")
 
-    # Mostrar primeras 10 columnas
-    cols_mostrar = list(df.columns)[:10]
+    # Show first 10 columns
+    cols_to_show = list(df.columns)[:10]
     if len(df.columns) > 10:
-        cols_mostrar.append(f"... y {len(df.columns) - 10} más")
-    print(f"Columnas: {cols_mostrar}")
+        cols_to_show.append(f"... and {len(df.columns) - 10} more")
+    print(f"Columns: {cols_to_show}")
 
-    # Verificar objeto del contrato
+    # Check contract object
     if 'objeto_a_contratar' in df.columns:
-        objetos_validos = df['objeto_a_contratar'].notna().sum()
-        objetos_definidos = df[df['objeto_a_contratar'] != 'NO DEFINIDO']['objeto_a_contratar'].notna().sum()
-        print(f"Contratos con objeto definido: {objetos_definidos}/{len(df)} ({objetos_validos} válidos)")
+        valid_objects = df['objeto_a_contratar'].notna().sum()
+        defined_objects = df[df['objeto_a_contratar'] != 'NO DEFINIDO']['objeto_a_contratar'].notna().sum()
+        print(f"Contracts with defined object: {defined_objects}/{len(df)} ({valid_objects} valid)")
 
 # ==============================================================================
-# BLOQUE DE EJECUCIÓN - MODIFICA AQUÍ LOS FILTROS
+# EXECUTION BLOCK - MODIFY FILTERS HERE
 # ==============================================================================
 
-# Variables de filtros
-limite = 10
-nivel_entidad = ""
-codigo_entidad = ""
-nombre_entidad = ""
-nit_entidad = ""
-departamento = "La Guajira"
-municipio = ""
-estado_proceso = ""
-modalidad = ""
-objeto_a_contratar = ""
-objeto_proceso = ""
-numero_proceso = ""
-valor_contrato = ""
-nombre_contratista = ""
-url_contrato = ""
-origen = ""
-tipo_documento = ""
-documento_proveedor = ""
-valor_minimo = 0
-valor_maximo = 0
-fecha_firma_desde = ""
-fecha_firma_hasta = ""
-fecha_inicio_desde = ""
-fecha_inicio_hasta = ""
+# Filter variables
+limit = 10
+entity_level = ""
+entity_code = ""
+entity_name = ""
+entity_nit = ""
+department = "La Guajira"
+municipality = ""
+process_status = ""
+modality = ""
+contract_object = ""
+process_object = ""
+process_number = ""
+contract_value = ""
+contractor_name = ""
+contract_url = ""
+origin = ""
+document_type = ""
+provider_document = ""
+minimum_value = 0
+maximum_value = 0
+signature_date_from = ""
+signature_date_to = ""
+start_date_from = ""
+start_date_to = ""
 
-# Ejecutar búsqueda
-df = buscar_contratos(
-    limite=limite,
-    nivel_entidad=nivel_entidad,
-    codigo_entidad=codigo_entidad,
-    nombre_entidad=nombre_entidad,
-    nit_entidad=nit_entidad,
-    departamento=departamento,
-    municipio=municipio,
-    estado_proceso=estado_proceso,
-    modalidad=modalidad,
-    objeto_a_contratar=objeto_a_contratar,
-    objeto_proceso=objeto_proceso,
-    numero_proceso=numero_proceso,
-    valor_contrato=valor_contrato,
-    nombre_contratista=nombre_contratista,
-    url_contrato=url_contrato,
-    origen=origen,
-    tipo_documento=tipo_documento,
-    documento_proveedor=documento_proveedor,
-    valor_minimo=valor_minimo,
-    valor_maximo=valor_maximo,
-    fecha_firma_desde=fecha_firma_desde,
-    fecha_firma_hasta=fecha_firma_hasta,
-    fecha_inicio_desde=fecha_inicio_desde,
-    fecha_inicio_hasta=fecha_inicio_hasta
+# Execute search
+df = search_contracts(
+    limit=limit,
+    entity_level=entity_level,
+    entity_code=entity_code,
+    entity_name=entity_name,
+    entity_nit=entity_nit,
+    department=department,
+    municipality=municipality,
+    process_status=process_status,
+    modality=modality,
+    contract_object=contract_object,
+    process_object=process_object,
+    process_number=process_number,
+    contract_value=contract_value,
+    contractor_name=contractor_name,
+    contract_url=contract_url,
+    origin=origin,
+    document_type=document_type,
+    provider_document=provider_document,
+    minimum_value=minimum_value,
+    maximum_value=maximum_value,
+    signature_date_from=signature_date_from,
+    signature_date_to=signature_date_to,
+    start_date_from=start_date_from,
+    start_date_to=start_date_to
 )
 
-# Guardar resultados
+# Save results
 if not df.empty:
-    archivo = exportar_excel(df)
-    if archivo:
-        print(f"Guardado en: {archivo}")
-    resumen_busqueda(df)
+    filename = export_excel(df)
+    if filename:
+        print(f"Saved to: {filename}")
+    search_summary(df)
 else:
-    print("No se encontraron contratos")
+    print("No contracts found")
 
-# Análisis rápido
+# Quick analysis
 df
 
-#Analizar DataSet
+# Analyze Dataset
 print(df.loc[0, 'objeto_a_contratar'])
 print(df.loc[0, 'url_contrato'])
 print(df.iloc[0:5][['nombre_de_la_entidad', 'departamento_entidad']])
