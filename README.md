@@ -427,20 +427,6 @@ After running the analysis, you get:
 - Only process official public data
 - Compliance with Law 1581/2012 on data protection
 
----
-
-## 📞 Support and Community
-
-### 💬 **Getting Help**
-- **Issues**: Report bugs or request features in GitHub Issues
-- **Discussions**: Join discussions in GitHub Discussions
-- **Email**: contact@secop-project.org (coming soon)
-
-### 🏆 **Acknowledgments**
-This project builds on the work of:
-- [Open Contracting Partnership](https://www.open-contracting.org/)
-- [Transparencia por Colombia](https://transparenciacolombia.org.co/)
-- Colombia's open data developer community
 
 ---
 
