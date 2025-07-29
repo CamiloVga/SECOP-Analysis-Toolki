@@ -1,0 +1,58 @@
+# SECOP Analysis Toolkit - Requirements
+# Developed by: Camilo Vega
+# AI Transformation Lead | AI/ML Engineer | Professor and AI Consultant
+
+# Core data processing
+pandas>=1.5.0
+numpy>=1.24.0
+requests>=2.28.0
+
+# Date and time handling
+python-dateutil>=2.8.2
+datetime
+
+# API integration
+sodapy>=2.2.0
+
+# Web scraping (optional, for advanced features)
+selenium>=4.8.0
+beautifulsoup4>=4.11.0
+undetected-chromedriver>=3.4.0
+playwright>=1.30.0
+
+# AI and text processing (optional, for AI features)
+openai>=1.0.0
+tavily-python>=0.3.0
+langchain>=0.1.0
+langchain-openai>=0.0.5
+
+# Data visualization
+matplotlib>=3.6.0
+seaborn>=0.12.0
+plotly>=5.13.0
+
+# Excel and file processing
+openpyxl>=3.1.0
+xlsxwriter>=3.0.0
+
+# PDF processing (for document analysis)
+PyPDF2>=3.0.0
+pdfplumber>=0.8.0
+pytesseract>=0.3.10
+pdf2image>=1.16.0
+Pillow>=9.4.0
+
+# Network analysis (for relationship mapping)
+networkx>=3.0
+igraph>=0.10.0
+
+# Advanced data processing
+scipy>=1.10.0
+scikit-learn>=1.2.0
+
+# Progress bars and utilities
+tqdm>=4.64.0
+colorama>=0.4.6
+
+# Google Colab integration
+google-colab>=1.0.0
